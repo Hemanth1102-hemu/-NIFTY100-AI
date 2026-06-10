@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Intelligence | Nifty 100</title>
+    <meta name="description" content="AI-powered financial analytics platform for Nifty 100 companies. Real-time sector insights, health scores, and ML predictions.">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-chart-line"></i> NIFTY100-AI
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#" class="nav-link active" data-page="overview"><i class="fa-solid fa-house"></i> Overview</a></li>
+                    <li><a href="#" class="nav-link" data-page="companies"><i class="fa-solid fa-building"></i> Companies</a></li>
+                    <li><a href="#" class="nav-link" data-page="sectors"><i class="fa-solid fa-layer-group"></i> Sectors</a></li>
+                    <li><a href="#" class="nav-link" data-page="ai-predictions"><i class="fa-solid fa-robot"></i> AI Predictions</a></li>
+                    <li><a href="#" class="nav-link" data-page="screeners"><i class="fa-solid fa-file-invoice-dollar"></i> Screeners</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-info">
+                    <i class="fa-solid fa-database"></i>
+                    <span>Live DB Connected</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div>
+                    <h1 id="pageTitle">Market Intelligence Dashboard</h1>
+                    <p id="pageSubtitle" style="color: var(--text-muted);">Real-time financial analysis & AI health scoring for Nifty 100 firms.</p>
+                </div>
+                <div class="header-actions">
+                    <div class="search-wrapper" id="globalSearchWrapper" style="display:none;">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="globalSearch" placeholder="Search anything..." />
+                    </div>
+                    <button class="icon-btn"><i class="fa-solid fa-bell"></i></button>
+                    <button class="icon-btn"><i class="fa-solid fa-refresh" id="refreshBtn"></i></button>
+                </div>
+            </header>
+
+            <!-- ===== OVERVIEW PAGE ===== -->
+            <div id="overviewPage" class="page-content">
+                <section class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-label"><i class="fa-solid fa-indian-rupee-sign"></i> Total Revenue (FY24)</span>
+                        <span class="stat-value" id="kpiRevenue">₹ 4.2T</span>
+                        <span class="stat-trend trend-up"><i class="fa-solid fa-arrow-up"></i> +12% YoY</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label"><i class="fa-solid fa-percent"></i> Avg. OPM</span>
+                        <span class="stat-value" id="kpiOPM">18.4%</span>
+                        <span class="stat-trend trend-up"><i class="fa-solid fa-arrow-up"></i> +2.1%</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label"><i class="fa-solid fa-building-columns"></i> Total Companies</span>
+                        <span class="stat-value" id="kpiCompanies">--</span>
+                        <span class="stat-trend"><i class="fa-solid fa-check-circle"></i> Nifty 100</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label"><i class="fa-solid fa-brain"></i> AI Health Coverage</span>
+                        <span class="stat-value" id="kpiMLCoverage">100/100</span>
+                        <span class="stat-trend trend-up"><i class="fa-solid fa-check-circle"></i> Clean Data</span>
+                    </div>
+                </section>
+
+                <section class="charts-grid" style="margin-top: 1.5rem;">
+                    <div class="chart-container">
+                        <h3><i class="fa-solid fa-chart-line"></i> Revenue Growth by Sector</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <h3><i class="fa-solid fa-heart-pulse"></i> Avg. AI Health Scores by Sector</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="healthChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="table-container" style="margin-top: 1.5rem;">
+                    <div class="table-header">
+                        <h3><i class="fa-solid fa-trophy"></i> Top Performing Companies</h3>
+                        <input type="text" id="companySearch" placeholder="Search companies..." class="table-search">
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Company</th>
+                                <th>Sector</th>
+                                <th>Revenue (Cr)</th>
+                                <th>ROE %</th>
+                                <th>Health Score</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="companyTableBody">
+                            <tr><td colspan="7" class="loading-cell"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <!-- ===== COMPANIES PAGE ===== -->
+            <div id="companiesPage" class="page-content" style="display:none;">
+                <div class="page-toolbar">
+                    <div class="filter-row">
+                        <select id="sectorFilter" class="filter-select">
+                            <option value="">All Sectors</option>
+                        </select>
+                        <input type="text" id="companyFilterSearch" placeholder="Search by name or symbol..." class="filter-input">
+                    </div>
+                    <div class="count-badge" id="companyCount">Loading...</div>
+                </div>
+                <section class="table-container">
+                    <div class="table-header">
+                        <h3><i class="fa-solid fa-building"></i> All Nifty 100 Companies</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Symbol</th>
+                                <th>Company Name</th>
+                                <th>Sector</th>
+                                <th>Industry</th>
+                                <th>ISIN</th>
+                                <th>Financials</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allCompaniesBody">
+                            <tr><td colspan="7" class="loading-cell"><i class="fa-solid fa-spinner fa-spin"></i> Loading companies...</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- Company Detail Modal -->
+                <div id="companyModal" class="modal" style="display:none;">
+                    <div class="modal-backdrop" id="modalBackdrop"></div>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div>
+                                <h2 id="modalCompanyName">Company Name</h2>
+                                <span id="modalCompanySector" class="sector-tag"></span>
+                            </div>
+                            <button class="icon-btn" id="closeModal"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-stats">
+                                <div class="modal-stat"><span>Revenue</span><strong id="mRevenue">N/A</strong></div>
+                                <div class="modal-stat"><span>Net Profit</span><strong id="mProfit">N/A</strong></div>
+                                <div class="modal-stat"><span>ROE %</span><strong id="mROE">N/A</strong></div>
+                                <div class="modal-stat"><span>D/E Ratio</span><strong id="mDE">N/A</strong></div>
+                                <div class="modal-stat"><span>OPM %</span><strong id="mOPM">N/A</strong></div>
+                                <div class="modal-stat"><span>Health Score</span><strong id="mHealth">N/A</strong></div>
+                            </div>
+                            <div class="chart-container" style="margin-top:1rem;">
+                                <h3>Revenue & Profit Trend</h3>
+                                <div class="chart-wrapper">
+                                    <canvas id="modalChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== SECTORS PAGE ===== -->
+            <div id="sectorsPage" class="page-content" style="display:none;">
+                <section class="stats-grid" id="sectorKPIs">
+                    <div class="stat-card">
+                        <span class="stat-label">Total Sectors</span>
+                        <span class="stat-value" id="kpiSectorCount">--</span>
+                        <span class="stat-trend">In Nifty 100</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Largest Sector</span>
+                        <span class="stat-value" id="kpiLargestSector">--</span>
+                        <span class="stat-trend trend-up">By Company Count</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Avg. OPM (All)</span>
+                        <span class="stat-value">18.4%</span>
+                        <span class="stat-trend trend-up"><i class="fa-solid fa-arrow-up"></i> +2.1%</span>
+                    </div>
+                </section>
+
+                <section class="charts-grid" style="margin-top:1.5rem;">
+                    <div class="chart-container">
+                        <h3><i class="fa-solid fa-chart-pie"></i> Companies per Sector</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="sectorPieChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <h3><i class="fa-solid fa-chart-bar"></i> Sector vs Avg Health Score</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="sectorHealthBar"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="table-container" style="margin-top:1.5rem;">
+                    <div class="table-header"><h3><i class="fa-solid fa-layer-group"></i> Sector Overview</h3></div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Sector Name</th>
+                                <th>No. of Companies</th>
+                                <th>Avg Health Score</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sectorTableBody">
+                            <tr><td colspan="5" class="loading-cell"><i class="fa-solid fa-spinner fa-spin"></i> Loading sectors...</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <!-- ===== AI PREDICTIONS PAGE ===== -->
+            <div id="aiPredictionsPage" class="page-content" style="display:none;">
+                <section class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-label"><i class="fa-solid fa-star"></i> Excellent Health</span>
+                        <span class="stat-value" id="kpiExcellent">--</span>
+                        <span class="stat-trend trend-up">Score ≥ 80</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label"><i class="fa-solid fa-thumbs-up"></i> Good Health</span>
+                        <span class="stat-value" id="kpiGood">--</span>
+                        <span class="stat-trend">Score 60–79</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label"><i class="fa-solid fa-triangle-exclamation"></i> Needs Attention</span>
+                        <span class="stat-value" id="kpiPoor">--</span>
+                        <span class="stat-trend trend-down">Score &lt; 60</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label"><i class="fa-solid fa-brain"></i> ML Models Active</span>
+                        <span class="stat-value">4</span>
+                        <span class="stat-trend trend-up">Scoring + Clustering</span>
+                    </div>
+                </section>
+
+                <section class="charts-grid" style="margin-top:1.5rem;">
+                    <div class="chart-container">
+                        <h3><i class="fa-solid fa-chart-bar"></i> Health Score Distribution</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="mlHistogram"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <h3><i class="fa-solid fa-chart-pie"></i> Health Label Breakdown</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="mlDonut"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="table-container" style="margin-top:1.5rem;">
+                    <div class="table-header">
+                        <h3><i class="fa-solid fa-robot"></i> AI Health Scorecard — All Companies</h3>
+                        <div class="filter-row" style="gap:0.5rem;">
+                            <button class="filter-pill active" data-filter="all">All</button>
+                            <button class="filter-pill" data-filter="excellent">Excellent</button>
+                            <button class="filter-pill" data-filter="good">Good</button>
+                            <button class="filter-pill" data-filter="poor">Attention</button>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Company</th>
+                                <th>Sector</th>
+                                <th>Health Score</th>
+                                <th>Label</th>
+                                <th>Anomaly</th>
+                                <th>Cluster</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mlScorecardBody">
+                            <tr><td colspan="7" class="loading-cell"><i class="fa-solid fa-spinner fa-spin"></i> Loading ML data...</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <!-- ===== SCREENERS PAGE ===== -->
+            <div id="screenersPage" class="page-content" style="display:none;">
+                <div class="screener-grid">
+                    <div class="screener-card" data-screener="topROE">
+                        <div class="screener-icon"><i class="fa-solid fa-fire"></i></div>
+                        <h4>Top ROE Companies</h4>
+                        <p>Companies with Return on Equity above 20%</p>
+                        <button class="screener-run-btn" data-screener="topROE">Run Screener</button>
+                    </div>
+                    <div class="screener-card" data-screener="debtFree">
+                        <div class="screener-icon" style="background:rgba(16,185,129,0.1);color:#10b981;"><i class="fa-solid fa-shield-halved"></i></div>
+                        <h4>Debt-Free Companies</h4>
+                        <p>Companies with Debt-to-Equity ratio of 0</p>
+                        <button class="screener-run-btn" data-screener="debtFree">Run Screener</button>
+                    </div>
+                    <div class="screener-card" data-screener="highOPM">
+                        <div class="screener-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b;"><i class="fa-solid fa-chart-line"></i></div>
+                        <h4>High Margin Companies</h4>
+                        <p>Companies with OPM% above sector average</p>
+                        <button class="screener-run-btn" data-screener="highOPM">Run Screener</button>
+                    </div>
+                    <div class="screener-card" data-screener="excellentHealth">
+                        <div class="screener-icon" style="background:rgba(99,102,241,0.1);color:#6366f1;"><i class="fa-solid fa-star"></i></div>
+                        <h4>Excellent Health Score</h4>
+                        <p>AI-rated companies with score ≥ 80</p>
+                        <button class="screener-run-btn" data-screener="excellentHealth">Run Screener</button>
+                    </div>
+                    <div class="screener-card" data-screener="consistentProfit">
+                        <div class="screener-icon" style="background:rgba(236,72,153,0.1);color:#ec4899;"><i class="fa-solid fa-coins"></i></div>
+                        <h4>Consistent Profitability</h4>
+                        <p>Companies profitable in every tracked year</p>
+                        <button class="screener-run-btn" data-screener="consistentProfit">Run Screener</button>
+                    </div>
+                    <div class="screener-card" data-screener="anomaly">
+                        <div class="screener-icon" style="background:rgba(239,68,68,0.1);color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <h4>Anomaly Detected</h4>
+                        <p>Companies flagged by ML anomaly detection</p>
+                        <button class="screener-run-btn" data-screener="anomaly">Run Screener</button>
+                    </div>
+                </div>
+
+                <section class="table-container" id="screenerResults" style="margin-top:1.5rem; display:none;">
+                    <div class="table-header">
+                        <h3 id="screenerResultTitle"><i class="fa-solid fa-filter"></i> Screener Results</h3>
+                        <span id="screenerResultCount" class="count-badge"></span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Symbol</th>
+                                <th>Company</th>
+                                <th>Sector</th>
+                                <th>Revenue (Cr)</th>
+                                <th>ROE %</th>
+                                <th>Health Score</th>
+                            </tr>
+                        </thead>
+                        <tbody id="screenerResultBody"></tbody>
+                    </table>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
