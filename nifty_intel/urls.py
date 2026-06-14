@@ -17,21 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import TemplateView
-from django.http import JsonResponse
-import traceback
-
-def debug_db_view(request):
-    try:
-        from core.models import Sector
-        count = Sector.objects.count()
-        sectors = list(Sector.objects.values()[:5])
-        return JsonResponse({"status": "success", "count": count, "sectors": sectors})
-    except Exception as e:
-        return JsonResponse({"status": "error", "error": str(e), "traceback": traceback.format_exc()})
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
-    path('debug-db/', debug_db_view),
     path('', TemplateView.as_view(template_name='index.html'), name='home'),
 ]

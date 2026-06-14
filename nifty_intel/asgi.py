@@ -18,5 +18,11 @@ application = get_asgi_application()
 try:
     from django.core.management import call_command
     call_command('migrate', interactive=False)
+    
+    # Auto-load real data if not present
+    from core.models import Company
+    if Company.objects.filter(financials__sales__gt=0).count() == 0:
+        print("Real data not loaded. Running load_real_data...")
+        call_command('load_real_data', interactive=False)
 except Exception as e:
-    print(f"Error running auto-migrations: {e}")
+    print(f"Error running auto-migrations/ETL: {e}")
