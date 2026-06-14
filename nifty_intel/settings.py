@@ -1,8 +1,6 @@
+import os
 from pathlib import Path
 from os import environ
-
-from django.core.exceptions import ImproperlyConfigured
-from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,17 +20,14 @@ def env_list(name, default=''):
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = environ.get('DJANGO_SECRET_KEY', 'django-insecure-_s_ihl#uvpxgpuii1adi^#8))i*m8gob-jr=+@uh))b+)9prny')
+
+# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env_bool('DJANGO_DEBUG', True)
 
-SECRET_KEY = environ.get('DJANGO_SECRET_KEY')
-if not SECRET_KEY:
-    if DEBUG:
-        SECRET_KEY = get_random_secret_key()
-    else:
-        raise ImproperlyConfigured('DJANGO_SECRET_KEY must be set when DJANGO_DEBUG=False.')
-
-ALLOWED_HOSTS = env_list('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost')
-CSRF_TRUSTED_ORIGINS = env_list('DJANGO_CSRF_TRUSTED_ORIGINS')
+ALLOWED_HOSTS = env_list('DJANGO_ALLOWED_HOSTS', '*')
 
 
 # Application definition
@@ -90,7 +85,9 @@ WSGI_APPLICATION = 'nifty_intel.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-DATABASE_ENGINE = environ.get('DATABASE_ENGINE', 'sqlite').strip().lower()
+
+IS_RENDER = 'RENDER' in environ
+DATABASE_ENGINE = environ.get('DATABASE_ENGINE', 'sqlite' if IS_RENDER else 'mysql').strip().lower()
 
 if DATABASE_ENGINE == 'mysql':
     DATABASES = {
@@ -98,7 +95,7 @@ if DATABASE_ENGINE == 'mysql':
             'ENGINE': 'django.db.backends.mysql',
             'NAME': environ.get('MYSQL_DATABASE', 'nifty_intel'),
             'USER': environ.get('MYSQL_USER', 'root'),
-            'PASSWORD': environ.get('MYSQL_PASSWORD', ''),
+            'PASSWORD': environ.get('MYSQL_PASSWORD', 'Hemanth1102@'),
             'HOST': environ.get('MYSQL_HOST', '127.0.0.1'),
             'PORT': environ.get('MYSQL_PORT', '3306'),
             'OPTIONS': {
@@ -167,7 +164,7 @@ STORAGES = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS
-CORS_ALLOW_ALL_ORIGINS = env_bool('CORS_ALLOW_ALL_ORIGINS', DEBUG)
+CORS_ALLOW_ALL_ORIGINS = env_bool('CORS_ALLOW_ALL_ORIGINS', True)
 CORS_ALLOWED_ORIGINS = env_list('CORS_ALLOWED_ORIGINS')
 
 # Production security. Keep these off in local HTTP development and enable them
