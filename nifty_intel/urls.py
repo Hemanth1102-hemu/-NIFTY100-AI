@@ -29,7 +29,7 @@ def debug_etl_view(request):
     sys.stderr = mystderr = StringIO()
     try:
         from django.core.management import call_command
-        call_command('load_real_data', interactive=False)
+        call_command('load_real_data')
         sys.stdout = old_stdout
         sys.stderr = old_stderr
         return JsonResponse({"status": "success", "stdout": mystdout.getvalue(), "stderr": mystderr.getvalue()})

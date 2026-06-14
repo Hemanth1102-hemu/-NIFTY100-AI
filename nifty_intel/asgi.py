@@ -23,6 +23,6 @@ try:
     from core.models import Company
     if Company.objects.filter(financials__sales__gt=0).count() == 0:
         print("Real data not loaded. Running load_real_data...")
-        call_command('load_real_data', interactive=False)
+        call_command('load_real_data')
 except Exception as e:
     print(f"Error running auto-migrations/ETL: {e}")
